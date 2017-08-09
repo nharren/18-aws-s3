@@ -25,7 +25,7 @@ const updatedContact = {
   phone: 'i'
 };
 
-describe('Contact Router', function() {
+describe('Contact Routes', function() {
   afterEach(done => {
     Promise.all([
       Contact.remove({}),

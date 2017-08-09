@@ -8,6 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const del = require('del');
+const debug = require('debug')('cf-rolodex:picture-router');
 const Contact = require('../model/contact.js');
 const Picture = require('../model/picture.js');
 
@@ -26,6 +27,8 @@ function s3Upload(params) {
 const pictureRouter = new Router();
 
 pictureRouter.post('/api/contact/:contactId/picture', bearerAuthentication, upload.single('image'), function(request, response, next) {
+  debug('POST: /api/contact/:contactId/picture');
+
   if (!request.file) {
     let error = createError(404, 'file not found');
     return next(error);
@@ -36,7 +39,8 @@ pictureRouter.post('/api/contact/:contactId/picture', bearerAuthentication, uplo
     return next(error);
   }
 
-  let ext = path.extname(request.file.originalName);
+  let ext = path.extname(request.file.originalname);
+
   let params = {
     ACL: 'public-read',
     Bucket: process.env.AWS_BUCKET,
@@ -55,7 +59,7 @@ pictureRouter.post('/api/contact/:contactId/picture', bearerAuthentication, uplo
         name: request.body.name,
         description: request.body.description,
         userId: request.user._id,
-        contactId: request.params.id,
+        contactId: request.params.contactId,
         imageURI: s3Data.Location,
         objectKey: s3Data.Key
       };
