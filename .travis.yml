@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  "6.11.1"
+before_install: 
+  - cd lab-nathan
+install:
+  - npm install
+script:
+  - npm run test
+services:
+  - mongodb
