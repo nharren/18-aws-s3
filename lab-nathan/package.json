@@ -4,10 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test-win": "SET DEBUG=authentication-server* && mocha",
-    "test": "DEBUG='authentication-server*' && mocha",
-    "start-win": "SET DEBUG=authentication-server* && node server.js",
-    "start": "DEBUG='authentication-server*' && node server.js"
+    "test-win": "SET DEBUG=cf-rolodex* && mocha",
+    "test": "DEBUG='cf-rolodex*' && mocha",
+    "start-win": "SET DEBUG=cf-rolodex* && node server.js",
+    "start": "DEBUG='cf-rolodex*' && node server.js"
   },
   "keywords": [],
   "author": "",

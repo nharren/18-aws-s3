@@ -1,7 +1,7 @@
 'use strict';
 
 const createError = require('http-errors');
-const debug = require('debug')('authentication-server:bearer-authentication');
+const debug = require('debug')('cf-rolodex:bearer-authentication');
 const jwt = require('jsonwebtoken');
 const User = require('../model/user.js');
 

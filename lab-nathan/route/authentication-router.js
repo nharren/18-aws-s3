@@ -2,7 +2,7 @@
 
 const Router = require('express').Router;
 const jsonParser = require('body-parser').json();
-const debug = require('debug')('authentication-server:authentication-router');
+const debug = require('debug')('cf-rolodex:authentication-router');
 const basicAuthentication = require('../middleware/basic-authentication.js');
 const User = require('../model/user.js');
 const createError = require('http-errors');

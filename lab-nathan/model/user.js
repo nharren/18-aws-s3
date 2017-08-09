@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const createError = require('http-errors');
 const jwt = require('jsonwebtoken');
-const debug = require('debug')('authentication-server:user');
+const debug = require('debug')('cf-rolodex:user');
 
 const Schema = mongoose.Schema;
 
