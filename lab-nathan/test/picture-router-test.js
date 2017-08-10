@@ -5,15 +5,12 @@ const request = require('superagent');
 const debug = require('debug')('cf-rolodex:picture-router-test');
 const fs = require('fs');
 const AWS = require('aws-sdk');
-const dataDir = `${__dirname}/../data`;
-const multer = require('multer');
 
 const Picture = require('../model/picture.js');
 const Contact = require('../model/contact.js');
 const User = require('../model/user.js');
 
 const s3 = new AWS.S3();
-const upload = multer({ dest: dataDir });
 
 require('../server.js');
 
@@ -210,6 +207,87 @@ describe('Picture Routes', function() {
             expect(response.body.name).to.equal(testPicture.name);
             expect(response.body.description).to.equal(testPicture.description);
             expect(response.body.contactId).to.equal(this.contact._id.toString());
+            done();
+          });
+      });
+    });
+  });
+
+  describe('DELETE: /api/contact/:contactId/picture/:pictureId', function() {
+    describe('with a valid token and valid id', function() {
+      debug('deletes a picture');
+
+      before(done => {
+        let user = new User(testUser);
+        user.generatePasswordHash(testUser.password)
+          .then(user => user.save())
+          .then(user => {
+            this.user = user;
+            return user.generateToken();
+          })
+          .then(token => {
+            this.token = token;
+            done();
+          })
+          .catch(done);
+      });
+
+      before(done => {
+        testContact.userId = this.user._id.toString();
+        Contact.create(testContact)
+          .then(contact => {
+            this.contact = contact;
+            done();
+          })
+          .catch(done);
+      });
+
+      before(done => {
+        fs.link(imagePath, testImagePath, () => {
+          testPicture.userId = this.user._id.toString();
+          testPicture.contactId = this.contact._id.toString();
+
+          let params = {
+            ACL: 'public-read',
+            Bucket: process.env.AWS_BUCKET,
+            Key: 'test-image.png',
+            Body: fs.createReadStream(`${__dirname}/../data/test-image.png`)
+          };
+
+          s3Upload(params)
+            .then(s3Data => {
+              testPicture.imageURI = s3Data.Location;
+              testPicture.objectKey = s3Data.Key;
+              return Picture.create(testPicture);
+            })
+            .then(picture => {
+              this.picture = picture;
+              done();
+            })
+            .catch(done);
+        });
+      });
+
+
+      after(done => {
+        delete testContact.userId;
+        delete testPicture.userId;
+        delete testPicture.contactId;
+        delete testPicture.imageURI;
+        delete testPicture.objectKey;
+        done();
+      });
+
+      it('should return a picture', done => {
+        request.delete(`${url}/api/contact/${this.contact._id}/picture/${this.picture._id}`)
+          .set({
+            Authorization: `Bearer ${this.token}`
+          })
+          .end((error, response) => {
+            if (error) {
+              return done(error);
+            }
+            expect(response.status).to.equal(204);
             done();
           });
       });

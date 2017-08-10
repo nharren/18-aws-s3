@@ -86,5 +86,29 @@ pictureRouter.get('/api/contact/:contactId/picture/:pictureId', bearerAuthentica
       next(error);
     });
 });
+  
+pictureRouter.delete('/api/contact/:contactId/picture/:pictureId', bearerAuthentication, function(request, response, next) {
+  debug('DELETE: /api/contact/:contactId/picture/:pictureId');
+
+  Picture.findById(request.params.pictureId)
+    .then(picture => {
+      return new Promise((resolve, reject) => {
+        let params = {
+          Bucket: process.env.AWS_BUCKET,
+          Key: picture.objectKey
+        };
+
+        s3.deleteObject(params, function(error) {
+          if (error) {
+            reject(error);
+          }
+          
+          response.sendStatus(204);
+          resolve();
+        });
+      });
+    })
+    .catch(next);
+});
 
 module.exports = pictureRouter;
