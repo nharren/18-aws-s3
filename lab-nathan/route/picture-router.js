@@ -74,4 +74,17 @@ pictureRouter.post('/api/contact/:contactId/picture', bearerAuthentication, uplo
     });
 });
 
+pictureRouter.get('/api/contact/:contactId/picture/:pictureId', bearerAuthentication, function(request, response, next) {
+  debug('GET: /api/contact/:contactId/picture/:pictureId');
+
+  Picture.findById(request.params.pictureId)
+    .then(picture => {
+      response.json(picture);
+      next();
+    })
+    .catch(error => {
+      next(error);
+    });
+});
+
 module.exports = pictureRouter;
