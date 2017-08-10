@@ -4,11 +4,17 @@ const expect = require('chai').expect;
 const request = require('superagent');
 const debug = require('debug')('cf-rolodex:picture-router-test');
 const fs = require('fs');
+const uuidv4 = require('uuid/v4');
 const AWS = require('aws-sdk');
+const path = require('path');
 
 const Picture = require('../model/picture.js');
 const Contact = require('../model/contact.js');
 const User = require('../model/user.js');
+
+const generateUserBefore = require('./lib/generate-user-before.js');
+const generateContactBefore = require('./lib/generate-contact-before.js');
+const generatePictureBefore = require('./lib/generate-picture-before.js');
 
 const s3 = new AWS.S3();
 
@@ -28,22 +34,13 @@ const testContact = {
   phone: 'f'
 };
 
-const imagePath = `${__dirname}/test-data/profile_default.png`;
-const testImagePath = `${__dirname}/../data/test-image.png`;
+const testImagePath = `${__dirname}/../data/${uuidv4()}.png`;
 
 const testPicture = {
   name: 'g',
   description: 'h',
   image: testImagePath
 };
-  
-function s3Upload(params) {
-  return new Promise(resolve => {
-    s3.upload(params, (error, s3Data) => {
-      resolve(s3Data);
-    });
-  });
-}
 
 describe('Picture Routes', function() {
   afterEach(done => {
@@ -60,33 +57,11 @@ describe('Picture Routes', function() {
     describe('with a valid token and valid data', function() {
       debug('POST: /api/contact/:contactId/picture');
 
-      before(done => {
-        let user = new User(testUser);
-        user.generatePasswordHash(testUser.password)
-          .then(user => user.save())
-          .then(user => {
-            this.user = user;
-            return user.generateToken();
-          })
-          .then(token => {
-            this.token = token;
-            done();
-          })
-          .catch(done);
-      });
+      before(generateUserBefore(this, testUser));
+      before(generateContactBefore(this, testContact));
 
       before(done => {
-        testContact.userId = this.user._id.toString();
-        Contact.create(testContact)
-          .then(contact => {
-            this.contact = contact;
-            done();
-          })
-          .catch(done);
-      });
-
-      before(done => {
-        fs.link(imagePath, testImagePath, () => {
+        fs.link(`${__dirname}/data/profile_default.png`, testImagePath, () => {
           done();
         });
       });
@@ -122,62 +97,17 @@ describe('Picture Routes', function() {
     describe('with a valid token and valid data', function() {
       debug('GET: /api/contact/:contactId/picture/:pictureId');
 
-      before(done => {
-        let user = new User(testUser);
-        user.generatePasswordHash(testUser.password)
-          .then(user => user.save())
-          .then(user => {
-            this.user = user;
-            return user.generateToken();
-          })
-          .then(token => {
-            this.token = token;
-            done();
-          })
-          .catch(done);
-      });
-
-      before(done => {
-        testContact.userId = this.user._id.toString();
-        Contact.create(testContact)
-          .then(contact => {
-            this.contact = contact;
-            done();
-          })
-          .catch(done);
-      });
-
-      before(done => {
-        fs.link(imagePath, testImagePath, () => {
-          testPicture.userId = this.user._id.toString();
-          testPicture.contactId = this.contact._id.toString();
-
-          let params = {
-            ACL: 'public-read',
-            Bucket: process.env.AWS_BUCKET,
-            Key: 'test-image.png',
-            Body: fs.createReadStream(`${__dirname}/../data/test-image.png`)
-          };
-
-          s3Upload(params)
-            .then(s3Data => {
-              testPicture.imageURI = s3Data.Location;
-              testPicture.objectKey = s3Data.Key;
-              return Picture.create(testPicture);
-            })
-            .then(picture => {
-              this.picture = picture;
-              done();
-            })
-            .catch(done);
-        });
-      });
-
+      before(generateUserBefore(this, testUser));
+      before(generateContactBefore(this, testContact));
+      before(generatePictureBefore(this, testPicture));
 
       after(done => {
+        let parsedFile = path.parse(testPicture.image);
+        let filename = parsedFile.base;
+
         let params = {
           Bucket: process.env.AWS_BUCKET,
-          Key: 'test-image.png'
+          Key: filename
         };
 
         s3.deleteObject(params, function(error) {
@@ -217,57 +147,9 @@ describe('Picture Routes', function() {
     describe('with a valid token and valid id', function() {
       debug('deletes a picture');
 
-      before(done => {
-        let user = new User(testUser);
-        user.generatePasswordHash(testUser.password)
-          .then(user => user.save())
-          .then(user => {
-            this.user = user;
-            return user.generateToken();
-          })
-          .then(token => {
-            this.token = token;
-            done();
-          })
-          .catch(done);
-      });
-
-      before(done => {
-        testContact.userId = this.user._id.toString();
-        Contact.create(testContact)
-          .then(contact => {
-            this.contact = contact;
-            done();
-          })
-          .catch(done);
-      });
-
-      before(done => {
-        fs.link(imagePath, testImagePath, () => {
-          testPicture.userId = this.user._id.toString();
-          testPicture.contactId = this.contact._id.toString();
-
-          let params = {
-            ACL: 'public-read',
-            Bucket: process.env.AWS_BUCKET,
-            Key: 'test-image.png',
-            Body: fs.createReadStream(`${__dirname}/../data/test-image.png`)
-          };
-
-          s3Upload(params)
-            .then(s3Data => {
-              testPicture.imageURI = s3Data.Location;
-              testPicture.objectKey = s3Data.Key;
-              return Picture.create(testPicture);
-            })
-            .then(picture => {
-              this.picture = picture;
-              done();
-            })
-            .catch(done);
-        });
-      });
-
+      before(generateUserBefore(this, testUser));
+      before(generateContactBefore(this, testContact));
+      before(generatePictureBefore(this, testPicture));
 
       after(done => {
         delete testContact.userId;

@@ -16,6 +16,8 @@ const userSchema = Schema({
   findHash: { type: String, unique: true }
 });
 
+let User;
+
 userSchema.methods.generatePasswordHash = function(password) {
   debug('generatePasswordHash');
 
@@ -75,4 +77,22 @@ userSchema.methods.generateToken = function() {
   });
 };
 
-module.exports = mongoose.model('user', userSchema);
+userSchema.statics.createAuthenticated = function(userData, callback) {
+  debug('createAuthenticated');
+  new User(userData).generatePasswordHash(userData.password)
+    .then(user => user.save())
+    .then(user => {
+      user.generateToken()
+        .then(token => {
+          callback(null, user, token);
+          return Promise.resolve();
+        })
+        .catch(error => {
+          callback(error);
+          return Promise.resolve();
+        });
+    })
+    .catch(callback);
+};
+
+module.exports = User = mongoose.model('user', userSchema);
