@@ -104,9 +104,11 @@ pictureRouter.delete('/api/contact/:contactId/picture/:pictureId', bearerAuthent
           }
           
           response.sendStatus(204);
-          resolve();
         });
       });
+    })
+    .then(picture => {
+      return picture.remove();
     })
     .catch(next);
 });

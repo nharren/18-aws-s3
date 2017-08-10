@@ -278,7 +278,7 @@ describe('Picture Routes', function() {
         done();
       });
 
-      it('should return a picture', done => {
+      it('should delete a picture', done => {
         request.delete(`${url}/api/contact/${this.contact._id}/picture/${this.picture._id}`)
           .set({
             Authorization: `Bearer ${this.token}`
@@ -287,6 +287,7 @@ describe('Picture Routes', function() {
             if (error) {
               return done(error);
             }
+
             expect(response.status).to.equal(204);
             done();
           });
