@@ -1,7 +1,7 @@
 'use strict';
 
 const createError = require('http-errors');
-const debug = require('debug')('authentication-server:basic-authentication');
+const debug = require('debug')('cf-rolodex:basic-authentication');
 
 let basicAuthentication = function(request, response, next) {
   debug('basicAuthentication');
