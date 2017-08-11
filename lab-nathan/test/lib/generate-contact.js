@@ -2,7 +2,7 @@
 
 const Contact = require('../../model/contact.js');
 
-let generateContactBefore = function(context, contactData) {
+let generateContact = function(context, contactData) {
   return done => {
     contactData.userId = context.user._id.toString();
     Contact.create(contactData)
@@ -14,4 +14,4 @@ let generateContactBefore = function(context, contactData) {
   };
 };
 
-module.exports = generateContactBefore;
+module.exports = generateContact;

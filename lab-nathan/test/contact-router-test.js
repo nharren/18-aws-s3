@@ -25,7 +25,18 @@ const updatedContact = {
   phone: 'i'
 };
 
+const server = require('../server.js');
+const serverToggle = require('./lib/server-toggle.js');
+
 describe('Contact Routes', function() {
+  before(done => {
+    serverToggle.serverOn(server, done);
+  });
+
+  after(done => {
+    serverToggle.serverOff(server, done);
+  });
+  
   afterEach(done => {
     Promise.all([
       Contact.remove({}),

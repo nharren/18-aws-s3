@@ -3,7 +3,7 @@
 const debug = require('debug')('cf-rolodex:picture-router-test');
 const User = require('../../model/user.js');
 
-let generateUserBefore = function(context, userData) {
+let generateUser = function(context, userData) {
   debug('generateUserBefore');
   
   return done => {
@@ -19,4 +19,4 @@ let generateUserBefore = function(context, userData) {
   };
 };
 
-module.exports = generateUserBefore;
+module.exports = generateUser;

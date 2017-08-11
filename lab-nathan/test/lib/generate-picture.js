@@ -7,7 +7,7 @@ const Picture = require('../../model/picture.js');
 
 const s3 = new AWS.S3();
 
-let generatePictureBefore = function(context, pictureData) {
+let generatePicture = function(context, pictureData) {
   return done => {
     fs.link(`${__dirname}/../data/profile_default.png`, pictureData.image, () => {
       pictureData.userId = context.user._id.toString();
@@ -45,4 +45,4 @@ function s3Upload(params) {
   });
 }
 
-module.exports = generatePictureBefore;
+module.exports = generatePicture;
