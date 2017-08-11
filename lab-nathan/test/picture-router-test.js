@@ -12,13 +12,14 @@ const Picture = require('../model/picture.js');
 const Contact = require('../model/contact.js');
 const User = require('../model/user.js');
 
-const generateUserBefore = require('./lib/generate-user-before.js');
-const generateContactBefore = require('./lib/generate-contact-before.js');
-const generatePictureBefore = require('./lib/generate-picture-before.js');
+const generateUser = require('./lib/generate-user.js');
+const generateContact = require('./lib/generate-contact.js');
+const generatePicture = require('./lib/generate-picture.js');
 
 const s3 = new AWS.S3();
 
-require('../server.js');
+const server = require('../server.js');
+const serverToggle = require('./lib/server-toggle.js');
 
 const url = `http://localhost:${process.env.PORT}`;
 
@@ -43,6 +44,14 @@ const testPicture = {
 };
 
 describe('Picture Routes', function() {
+  before(done => {
+    serverToggle.serverOn(server, done);
+  });
+
+  after(done => {
+    serverToggle.serverOff(server, done);
+  });
+
   afterEach(done => {
     Promise.all([
       Picture.remove({}),
@@ -57,8 +66,8 @@ describe('Picture Routes', function() {
     describe('with a valid token and valid data', function() {
       debug('POST: /api/contact/:contactId/picture');
 
-      before(generateUserBefore(this, testUser));
-      before(generateContactBefore(this, testContact));
+      before(generateUser(this, testUser));
+      before(generateContact(this, testContact));
 
       before(done => {
         fs.link(`${__dirname}/data/profile_default.png`, testImagePath, () => {
@@ -97,9 +106,9 @@ describe('Picture Routes', function() {
     describe('with a valid token and valid data', function() {
       debug('GET: /api/contact/:contactId/picture/:pictureId');
 
-      before(generateUserBefore(this, testUser));
-      before(generateContactBefore(this, testContact));
-      before(generatePictureBefore(this, testPicture));
+      before(generateUser(this, testUser));
+      before(generateContact(this, testContact));
+      before(generatePicture(this, testPicture));
 
       after(done => {
         let parsedFile = path.parse(testPicture.image);
@@ -147,9 +156,9 @@ describe('Picture Routes', function() {
     describe('with a valid token and valid id', function() {
       debug('deletes a picture');
 
-      before(generateUserBefore(this, testUser));
-      before(generateContactBefore(this, testContact));
-      before(generatePictureBefore(this, testPicture));
+      before(generateUser(this, testUser));
+      before(generateContact(this, testContact));
+      before(generatePicture(this, testPicture));
 
       after(done => {
         delete testContact.userId;

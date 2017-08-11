@@ -24,6 +24,8 @@ app.use(contactRouter);
 app.use(pictureRouter);
 app.use(errors);
 
-app.listen(process.env.PORT, function() {
+const server = module.exports = app.listen(process.env.PORT, function() {
   debug(`Listening on port ${process.env.PORT}.`);
 });
+
+server.isRunning = true;
